@@ -281,7 +281,7 @@ scheduler:
   #   comment: "job to cleanup stats_mysql_query_digest table"
 
 ## If enabled, generate automagically a list of proxysql servers based on the
-#    the number statefullset 'proxysql-core' replicas (default 3).
+#    the number statefulset 'proxysql-core' replicas (default 3).
 use_default_proxysql_servers: true
 
 ## Defines an additional list of ProxySQL peers (clustering).
@@ -314,7 +314,7 @@ proxysql_cluster:
     # Restart ProxySQL if crashes
     exit_on_error: false
 
-    statefullset:
+    statefulset:
       nodeSelector: {}
       tolerations: []
       affinity: {}

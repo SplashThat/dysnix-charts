@@ -113,7 +113,7 @@ proxysql_cluster:
     replicas: 3
     exit_on_error: false
 
-    statefullset:
+    statefulset:
       nodeSelector: {}
       tolerations: []
       affinity: {}
