@@ -25,7 +25,7 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/config.scripts: {{ include (print $.Template.BasePath "/configmap-scripts.yaml") . | sha256sum }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
-        {{- with (mergeOverwrite .Values.podAnnotations .Values.proxysql_cluster.core.statefullset.podAnnotations) }}
+        {{- with (mergeOverwrite .Values.podAnnotations .Values.proxysql_cluster.core.statefulset.podAnnotations) }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       labels:
@@ -82,7 +82,7 @@ spec:
           readinessProbe: {{ toYaml . | nindent 12 }}
           {{- end }}
           resources:
-            {{- toYaml (default .Values.resources .Values.proxysql_cluster.core.statefullset.resources) | nindent 12 }}
+            {{- toYaml (default .Values.resources .Values.proxysql_cluster.core.statefulset.resources) | nindent 12 }}
           volumeMounts:
             {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
@@ -147,15 +147,15 @@ spec:
             {{- toYaml .| nindent 12 }}
           {{- end }}
         {{- end }}
-      {{- with (default .Values.nodeSelector .Values.proxysql_cluster.core.statefullset.nodeSelector) }}
+      {{- with (default .Values.nodeSelector .Values.proxysql_cluster.core.statefulset.nodeSelector) }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- with (default .Values.affinity .Values.proxysql_cluster.core.statefullset.affinity) }}
+    {{- with (default .Values.affinity .Values.proxysql_cluster.core.statefulset.affinity) }}
       affinity:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with (default .Values.tolerations .Values.proxysql_cluster.core.statefullset.tolerations) }}
+    {{- with (default .Values.tolerations .Values.proxysql_cluster.core.statefulset.tolerations) }}
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}

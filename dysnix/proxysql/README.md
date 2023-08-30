@@ -69,6 +69,51 @@ The following table lists the configurable parameters of the ProxySQL chart and 
 | `podDisruptionBudget.enabled`               | If true, create a pod disruption budget for master pods. | `false`                                                      |
 | `podDisruptionBudget.minAvailable`          | Minimum number / percentage of pods that should remain scheduled | `1`                                                  |
 | `podDisruptionBudget.maxUnavailable`        | Maximum number / percentage of pods that may be made unavailable | 
+| `proxysql_cluster.core.enabled` | Deploy core ProxySQL workload | `true`
+| `proxysql_cluster.core.exit_on_error` | Restart ProxySQL if crashes | `false`
+| `proxysql_cluster.core.replicas` | Number of core/main ProxySQL nodes to listen on | `3`
+| `proxysql_cluster.core.service.exposeProxyPort` | Expose the proxy (to MySQL servers) port | `false`
+| `proxysql_cluster.core.service.name` | Override default core service name | `nil`
+| `proxysql_cluster.core.statefulset.affinity` | Set core Pod affinity | `{}`
+| `proxysql_cluster.core.statefulset.nodeSelector` | Set core Pod node selector | `{}`
+| `proxysql_cluster.core.statefulset.podAnnotations` | Set core Pod annotations | `{}`
+| `proxysql_cluster.core.statefulset.resources` | Set core Pod resources (requests and limits) | `{}`
+| `proxysql_cluster.core.statefulset.tolerations` | Set core Pod tolerations | `[]`
+| `proxysql_cluster.enabled` | Deploy ProxySQL (clustered) workloads | `false` | 
+| `proxysql_cluster.healthcheck.sidecar.command` | Command to run for healthcheck sidecar | `["/usr/local/bin/proxysql_cluster_healthcheck.sh"]`
+| `proxysql_cluster.healthcheck.sidecar.config.diff_check_limit` | How many diff_check errors are tolerated before the healthcheck fails | `10`
+| `proxysql_cluster.healthcheck.sidecar.config.kill_if_healthcheck_failed` | Kill proxysql daemon if the healthcheck fails the test | `true`
+| `proxysql_cluster.healthcheck.sidecar.config.psql_host` | The listening core host/pod | `"127.0.0.1"`
+| `proxysql_cluster.healthcheck.sidecar.config.psql_host_port` | The admin port | `6032`
+| `proxysql_cluster.healthcheck.sidecar.config.psql_pass` | Monitor user | `"monitor"`
+| `proxysql_cluster.healthcheck.sidecar.config.psql_user` | Monitor password | `"monitor"`
+| `proxysql_cluster.healthcheck.sidecar.enabled` | Inject a healthcheck sidecar container to all proxysql clustering Pods | `false`
+| `proxysql_cluster.healthcheck.sidecar.image` | Container image | `"mysql:debian"`
+| `proxysql_cluster.healthcheck.sidecar.securityContext` | Set healthcheck sidecar security context | (see values.yaml)
+| `proxysql_cluster.job.affinity` | Set Job affinity | `{}`
+| `proxysql_cluster.job.backoffLimit` | Set Job backoff limit | `3`
+| `proxysql_cluster.job.enabled` | Deploy Kubernetes Job to initialize cluster | `true`
+| `proxysql_cluster.job.image.pullPolicy` | Set Job image pull policy | `"IfNotPresent"`
+| `proxysql_cluster.job.image.registry` | Set Job image registry | `"docker.io"`
+| `proxysql_cluster.job.image.repository` | Set Job image repository | `"mysql"`
+| `proxysql_cluster.job.image.tag` | Set Job image tag | `"8"`
+| `proxysql_cluster.job.nodeSelector` | Set Job Pod node selector | `{}`
+| `proxysql_cluster.job.podAnnotations` | Set Job Pod annotations | `{}`
+| `proxysql_cluster.job.resources` | Set Job Pod resources (requests and limits) | `{}`
+| `proxysql_cluster.job.tolerations` | Set Job Pod tolerations | `[]`
+| `proxysql_cluster.job.ttlSecondsAfterFinished` | Set Job time-to-live seconds after finished | `3600`
+| `proxysql_cluster.satellite.daemonset.affinity` | Set DaemonSet Pod affinity | `{}`
+| `proxysql_cluster.satellite.daemonset.nodeSelector` | Set DaemonSet Pod node selector | `{}`
+| `proxysql_cluster.satellite.daemonset.podAnnotations` | Set DaemonSet Pod annotations | `{}`
+| `proxysql_cluster.satellite.daemonset.resources` | Set DaemonSet Pod resources (requests and limits) | `{}`
+| `proxysql_cluster.satellite.daemonset.tolerations` | Set DaemonSet Pod tolerations | `[]`
+| `proxysql_cluster.satellite.enabled` | Deploy satellite ProxySQL workload | `true`
+| `proxysql_cluster.satellite.exit_on_error` | Job Pod | `false`
+| `proxysql_cluster.satellite.kind` | Workload type for satellite ProxySQL | `"DaemonSet"`
+| `proxysql_cluster.satellite.replicas` | Number of satellite ProxySQL nodes to listen on | `3`
+| `proxysql_cluster.satellite.service.name` | Override default satellite service name | `nil`
+| `proxysql_cluster.secret.cluster_password` | This are the variables to set `admin_credentials` and corresponding `cluster_` variables | `"proxysql"`
+| `proxysql_cluster.secret.cluster_username` | This are the variables to set `admin_credentials` and corresponding `cluster_` variables | `"proxysql-cluster"`
 | `admin_variables.admin_credentials`         | ProxySQL admin credentials for the management (127.0.0.1:6032)  | `admin:admin`                                         |
 | `admin_variables.debug`                     | ProxySQL debug mode                                | `false`                                                            |
 | `admin_variables_include`                   | A list of files to @include in the `admin_variables` section | `[]`                                                     |
