@@ -1,0 +1,38 @@
+suite: service
+templates:
+  - service.yaml
+
+tests:
+  - it: restapi default port, no nodeport
+    values:
+      - ./values/common.yaml
+    set:
+      proxysql_cluster.enabled: true
+      proxysql_cluster.core.enabled: true
+
+    asserts:
+      - template: service.yaml
+        contains:
+          path: spec.ports
+          content:
+            name: restapi
+            port: 6070
+            targetPort: restapi
+
+  - it: restapi non-default port with nodeport
+    values:
+      - ./values/common.yaml
+      - ./values/restapi-port-nodeport.yaml
+    set:
+      proxysql_cluster.enabled: true
+      proxysql_cluster.core.enabled: true
+
+    asserts:
+      - template: service.yaml
+        contains:
+          path: spec.ports
+          content:
+            name: restapi
+            port: 4270
+            targetPort: restapi
+            nodePort: 14270

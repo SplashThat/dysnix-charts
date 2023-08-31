@@ -1,0 +1,90 @@
+suite: workloads
+templates:
+  - configmap-scripts.yaml
+  - configmap.yaml
+  - secret.yaml
+  - deployment.yaml
+  - daemonset.yaml
+  - statefulset.yaml
+
+tests:
+  #
+  # default restapi port
+  #
+  - it: "statefulset: restapi default port"
+    values: &values_default_port
+      - ./values/common.yaml
+
+    set: &set_statefulset
+      proxysql_cluster.satellite.enabled: false
+      proxysql_cluster.enabled: true
+
+    template: statefulset.yaml
+
+    asserts: &assert_default_port
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: restapi
+            containerPort: 6070
+            protocol: TCP
+
+  - it: "daemonset: restapi default port"
+    values: *values_default_port
+
+    set: &set_daemonset
+      proxysql_cluster.satellite.enabled: true
+      proxysql_cluster.satellite.kind: DaemonSet
+
+    template: daemonset.yaml
+
+    asserts: *assert_default_port
+
+  - it: "deployment: restapi default port"
+    values: *values_default_port
+
+    set: &set_deployment
+      proxysql_cluster.satellite.enabled: true
+      proxysql_cluster.satellite.kind: Deployment
+
+    template: deployment.yaml
+
+    asserts: *assert_default_port
+
+  #
+  # non-default restapi port
+  #
+  - it: "statefulset: restapi non-default port"
+    values: &values_non_default_port
+      - ./values/common.yaml
+      - ./values/restapi-port-nodeport.yaml
+
+    set: *set_statefulset
+
+    template: statefulset.yaml
+
+    asserts: &assert_non_default_port
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: restapi
+            containerPort: 4270
+            protocol: TCP
+
+  - it: "daemonset: restapi default port"
+    values: *values_non_default_port
+
+    set: *set_daemonset
+
+    template: daemonset.yaml
+
+    asserts: *assert_non_default_port
+
+  - it: "deployment: restapi default port"
+    values: *values_non_default_port
+
+    set: *set_deployment
+
+    template: deployment.yaml
+
+    asserts: *assert_non_default_port

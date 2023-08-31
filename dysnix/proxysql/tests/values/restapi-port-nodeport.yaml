@@ -1,0 +1,3 @@
+service:
+  restapiPort: 4270
+  restapiNodePort: 14270

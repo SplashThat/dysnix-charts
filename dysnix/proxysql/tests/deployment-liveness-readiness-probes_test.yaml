@@ -1,4 +1,4 @@
-suite: deployment
+suite: workloads
 templates:
   - configmap-scripts.yaml
   - configmap.yaml

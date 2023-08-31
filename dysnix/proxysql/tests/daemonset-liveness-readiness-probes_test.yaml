@@ -1,4 +1,4 @@
-suite: daemonset
+suite: workloads
 templates:
   - configmap-scripts.yaml
   - configmap.yaml
