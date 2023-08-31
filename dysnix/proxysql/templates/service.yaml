@@ -47,6 +47,12 @@ spec:
       {{- if .Values.service.webNodePort }}
       nodePort: {{ .Values.service.webNodePort }}
       {{- end }}
+    - name: restapi
+      port: {{ .Values.service.restapiPort }}
+      targetPort: restapi
+      {{- if .Values.service.restapiNodePort }}
+      nodePort: {{ .Values.service.restapiNodePort }}
+      {{- end }}
   selector:
     app: {{ include "proxysql.name" . }}
     release: {{ .Release.Name }}
@@ -89,6 +95,12 @@ spec:
       targetPort: web
       {{- if .Values.service.webNodePort }}
       nodePort: {{ .Values.service.webNodePort }}
+      {{- end }}
+    - name: restapi
+      port: {{ .Values.service.restapiPort }}
+      targetPort: restapi
+      {{- if .Values.service.restapiNodePort }}
+      nodePort: {{ .Values.service.restapiNodePort }}
       {{- end }}
   clusterIP: None
   selector:

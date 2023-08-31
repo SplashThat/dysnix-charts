@@ -1,0 +1,23 @@
+suite: configmap
+templates:
+  - configmap.yaml
+
+tests:
+  - it: restapi_port correct with default port
+    values:
+      - ./values/common.yaml
+
+    asserts:
+      - matchRegex:
+          path: data.[proxysql.cnf]
+          pattern: restapi_port\s*=\s*6070
+
+  - it: restapi_port correct with non-default port
+    values:
+      - ./values/common.yaml
+      - ./values/restapi-port-nodeport.yaml
+
+    asserts:
+      - matchRegex:
+          path: data.[proxysql.cnf]
+          pattern: restapi_port\s*=\s*4270

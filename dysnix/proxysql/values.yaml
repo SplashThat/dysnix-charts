@@ -79,6 +79,14 @@ service:
   ##
   # webNodePort:
 
+  ## REST API and metrics port
+  restapiPort: 6070
+
+  ## Specify the >restapi< NodePort value for the LoadBalancer and NodePort service types.
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
+  ##
+  # restapiNodePort:
+
   ## Provide any additional annotations which may be required.
   ## The value is evaluated as a template, so, for example, the value can depend on .Release or .Chart
   annotations: {}
