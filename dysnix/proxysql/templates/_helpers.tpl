@@ -99,3 +99,10 @@ ProxySQL SSL directory
 {{ .Values.ssl.sslDir }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+ProxySQL Core service things
+*/}}
+{{- define "proxysql.core.service.name" -}}
+{{ .Values.proxysql_cluster.core.service.name | default (printf "%s-core" (include "proxysql.fullname" .)) }}
+{{- end -}}

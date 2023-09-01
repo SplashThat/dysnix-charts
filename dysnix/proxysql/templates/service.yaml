@@ -61,7 +61,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.proxysql_cluster.core.service.name | default (printf "%s-core" (include "proxysql.fullname" .)) | quote }}
+  name: {{ include "proxysql.core.service.name" .| quote }}
   labels:
     {{- include "proxysql.labels" . | nindent 4 }}
     {{- if .Values.commonLabels }}

@@ -1,0 +1,50 @@
+suite: statefulset
+templates:
+  - configmap-scripts.yaml
+  - configmap.yaml
+  - secret.yaml
+  - statefulset.yaml
+  - service.yaml
+
+tests:
+  - it: StatefulSet serviceName matches Service name when overriding release name
+    values:
+      - ./values/common.yaml
+      - ./values/override-release-name.yaml
+    set:
+      proxysql_cluster.enabled: true
+      proxysql_cluster.core.enabled: true
+
+    asserts:
+      - template: service.yaml
+        documentIndex: 1
+        equal:
+          path: metadata.name
+          value: &override_release_name foobar-test-core
+
+      - template: statefulset.yaml
+        equal:
+          path: spec.serviceName
+          value: *override_release_name
+
+  - it: >
+      StatefulSet serviceName matches Service name when overriding
+      both release and core service name
+    values:
+      - ./values/common.yaml
+      - ./values/override-release-name-and-core-service-name.yaml
+    set:
+      proxysql_cluster.enabled: true
+      proxysql_cluster.core.enabled: true
+
+    asserts:
+      - template: service.yaml
+        documentIndex: 1
+        equal:
+          path: metadata.name
+          value: &override_both_name foobar-override
+
+      - template: statefulset.yaml
+        equal:
+          path: spec.serviceName
+          value: *override_both_name
