@@ -13,9 +13,7 @@ admin_variables=
   {{- else }}
   mysql_ifaces={{ printf "0.0.0.0:%d" (.Values.service.adminPort | int) | quote }}
   {{- end }}
-  {{- if .Values.admin_variables.restapi_port }}
-  restapi_port={{ .Values.admin_variables.restapi_port }}
-  {{- else }}
+  {{- if not .Values.admin_variables.restapi_port }}
   restapi_port={{ .Values.service.restapiPort }}
   {{- end }}
   {{- range $key, $value := .Values.admin_variables }}
