@@ -1,0 +1,6 @@
+fullnameOverride: foobar-test
+
+proxysql_cluster:
+  core:
+    service:
+      name: foobar-override
