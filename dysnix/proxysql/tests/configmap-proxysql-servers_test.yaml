@@ -3,10 +3,13 @@ templates:
   - configmap.yaml
 
 tests:
-  - it: proxysql_servers correct
+  - it: proxysql_servers correct when overriding release name
     values:
       - ./values/common.yaml
-      - ./values/proxysql-servers.yaml
+      - ./values/override-release-name.yaml
+    set:
+      proxysql_cluster.enabled: true
+      proxysql_cluster.core.enabled: true
 
     asserts:
       - matchRegex:
@@ -14,5 +17,22 @@ tests:
           # NOTE: the renderer organizes the keys in alphabetical order
           pattern: |
             \s+hostname="foobar-test-core-0.foobar-test-core"
+            \s+port=6032
+            \s+weight=100
+
+  - it: proxysql_servers correct when overriding both release and core service name
+    values:
+      - ./values/common.yaml
+      - ./values/override-release-name-and-core-service-name.yaml
+    set:
+      proxysql_cluster.enabled: true
+      proxysql_cluster.core.enabled: true
+
+    asserts:
+      - matchRegex:
+          path: data.[proxysql.cnf]
+          # NOTE: the renderer organizes the keys in alphabetical order
+          pattern: |
+            \s+hostname="foobar-test-core-0.foobar-override"
             \s+port=6032
             \s+weight=100
