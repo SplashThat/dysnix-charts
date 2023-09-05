@@ -10,7 +10,7 @@ tests:
     asserts:
       - matchRegex:
           path: data.[proxysql.cnf]
-          pattern: restapi_port\s*=\s*6070
+          pattern: \s+restapi_port\s*=\s*6070
 
   - it: restapi_port correct with non-default port
     values:
@@ -20,4 +20,19 @@ tests:
     asserts:
       - matchRegex:
           path: data.[proxysql.cnf]
-          pattern: restapi_port\s*=\s*4270
+          pattern: \s+restapi_port\s*=\s*4270
+
+  - it: admin_variables.restapi_port specified directly does not cause duplicate setting
+    values:
+      - ./values/common.yaml
+      - ./values/admin-variables-restapi-port-specified-directly.yaml
+    set:
+      proxysql_cluster.enabled: true
+      proxysql_cluster.core.enabled: true
+
+    asserts:
+      - notMatchRegex:
+          path: data.[proxysql.cnf]
+          pattern: |
+            (\s+restapi_port\s*=\s*4270
+            .*){2,}
