@@ -13,7 +13,7 @@ tests:
 
     asserts:
       - matchRegex:
-          path: data.[proxysql.cnf]
+          path: data["proxysql.cnf"]
           # NOTE: the renderer organizes the keys in alphabetical order
           pattern: |
             \s+hostname="foobar-test-core-0.foobar-test-core"
@@ -30,7 +30,7 @@ tests:
 
     asserts:
       - matchRegex:
-          path: data.[proxysql.cnf]
+          path: data["proxysql.cnf"]
           # NOTE: the renderer organizes the keys in alphabetical order
           pattern: |
             \s+hostname="foobar-test-core-0.foobar-override"
