@@ -39,7 +39,7 @@ export charts_dir="${1:-charts/}"
 
 echo 'Fetching tools'
 apk add --no-cache git yq
-git config --global --add safe.directory /github/workspace
+git config --global --add safe.directory /apps
 
 echo 'Looking up latest tag...'
 latest_tag=$(lookup_latest_tag)
@@ -51,7 +51,7 @@ if [ -n "$changed_charts" ]; then
     for chart in $changed_charts; do
         if (ls -1 "$chart"/tests/*_test.yaml 1>/dev/null 2>/dev/null); then
             helm dependency update "$chart" 
-            helm unittest --color --helm3 "$chart"
+            helm unittest --color "$chart"
         fi
     done
 fi
