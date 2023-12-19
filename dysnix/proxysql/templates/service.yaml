@@ -54,7 +54,11 @@ spec:
       nodePort: {{ .Values.service.restapiNodePort }}
       {{- end }}
   selector:
+    {{- if .Values.proxysql_cluster.satellite.enabled }}
     app: {{ include "proxysql.name" . }}
+    {{- else }}
+    app: {{ include "proxysql.name" . }}-core
+    {{- end }}
     release: {{ .Release.Name }}
 ---
 {{ if and .Values.proxysql_cluster.enabled .Values.proxysql_cluster.core.enabled }}
