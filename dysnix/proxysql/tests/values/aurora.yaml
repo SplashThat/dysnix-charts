@@ -1,0 +1,5 @@
+mysql_aws_aurora_hostgroups:
+  - writer_is_also_reader: 1
+    writer_hostgroup: 10
+    reader_hostgroup: 20
+    domain_name: "rds.amazon.com"
