@@ -1,0 +1,19 @@
+suite: configmap
+templates:
+  - configmap.yaml
+
+tests:
+  - it: aurora correct
+    values:
+      - ./values/common.yaml
+      - ./values/aurora.yaml
+
+    asserts:
+      - matchRegex:
+          path: data["proxysql.cnf"]
+          # NOTE: the renderer organizes the keys in alphabetical order
+          pattern: |
+            \s+domain_name="rds.amazon.com"
+            \s+reader_hostgroup=20
+            \s+writer_hostgroup=10
+            \s+writer_is_also_reader=1

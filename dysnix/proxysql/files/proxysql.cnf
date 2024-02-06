@@ -136,3 +136,14 @@ mysql_replication_hostgroups=
   },
   {{- end }}
 )
+
+mysql_aws_aurora_hostgroups=
+(
+  {{- range $_, $hostgroup := .Values.mysql_aws_aurora_hostgroups }}
+  {
+    {{- range $key, $value := $hostgroup }}
+    {{ $key }}={{ $value | toJson }}
+    {{- end }}
+  },
+  {{- end }}
+)
