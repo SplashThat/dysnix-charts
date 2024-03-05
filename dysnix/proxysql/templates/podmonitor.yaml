@@ -1,0 +1,13 @@
+{{- if and .Values.podmonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ include "proxysql.fullname" . }}
+spec:
+  podMetricsEndpoints:
+    - path: /metrics
+      targetPort: {{ .Values.service.restapiPort }}
+  selector:
+    matchLabels:
+      {{- include "proxysql.core.selectorLabels" . | nindent 6 }}
+{{- end }}
