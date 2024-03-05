@@ -1,0 +1,30 @@
+suite: podmonitor
+templates:
+  - podmonitor.yaml
+
+tests:
+  - it: podmonitor enabled
+    values:
+      - ./values/common.yaml
+    set:
+      podmonitor.enabled: true
+
+    asserts:
+      - isKind:
+          of: PodMonitor
+      - matchRegex:
+          path: metadata.name
+          pattern: -proxysql$
+      - equal:
+          path: spec.selector.matchLabels.app
+          value: proxysql-core
+
+  - it: podmonitor disabled
+    values:
+      - ./values/common.yaml
+    set:
+      podmonitor.enabled: false
+
+    asserts:
+      - hasDocuments:
+        count: 0
