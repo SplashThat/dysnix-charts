@@ -1,7 +1,0 @@
-pid file = /tmp/rsyncd.pid
-use chroot = no
-read only = yes
-
-[bsc]
-  path = {{ .Values.rsyncd.bsc_path }}
-  list = no

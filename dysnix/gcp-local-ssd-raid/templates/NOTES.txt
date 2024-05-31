@@ -1,2 +1,0 @@
-GCP Local SSD raid deployed.
-Please use `local-storage` StorageClass.
