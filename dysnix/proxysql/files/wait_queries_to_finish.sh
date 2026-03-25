@@ -7,17 +7,29 @@
 
 set -u
 
+PAUSE_TIMEOUT="${PROXYSQL_PAUSE_TIMEOUT:-10}"
+
 # Pause ProxySQL to kill idle connections and close listeners before draining.
 # Requires PROXYSQL_ADMIN_USER and PROXYSQL_ADMIN_PASSWORD env vars.
 if [ -n "${PROXYSQL_ADMIN_USER:-}" ] && [ -n "${PROXYSQL_ADMIN_PASSWORD:-}" ]; then
   echo "Executing PROXYSQL PAUSE..."
-  mysql -h127.0.0.1 -P"${PROXYSQL_ADMIN_PORT:-6032}" -u"${PROXYSQL_ADMIN_USER}" -p"${PROXYSQL_ADMIN_PASSWORD}" -e "PROXYSQL PAUSE"
-  echo "PROXYSQL PAUSE complete. Idle connections terminated, listeners closed."
+
+  timeout "${PAUSE_TIMEOUT}" \
+    MYSQL_PWD="${PROXYSQL_ADMIN_PASSWORD}" mysql -h127.0.0.1 -P"${PROXYSQL_ADMIN_PORT:-6032}" -u"${PROXYSQL_ADMIN_USER}" -e "PROXYSQL PAUSE"
+  pause_exit=$?
+
+  if [ "${pause_exit}" -eq 0 ]; then
+    echo "PROXYSQL PAUSE complete. Idle connections terminated, listeners closed."
+  elif [ "${pause_exit}" -eq 124 ]; then
+    echo "WARNING: PROXYSQL PAUSE timed out after ${PAUSE_TIMEOUT}s. Continuing shutdown without pause."
+  else
+    echo "WARNING: PROXYSQL PAUSE failed (exit code ${pause_exit}). Continuing shutdown without pause."
+  fi
 else
   echo "WARNING: PROXYSQL_ADMIN_USER or PROXYSQL_ADMIN_PASSWORD not set, skipping PROXYSQL PAUSE"
 fi
 
-echo "Waiting for proxy queries to finish..."
+echo "Waiting for active proxy queries to finish..."
 
 while true; do
   CONNECTED_IPS=$(for pid in $(pidof proxysql); do \
