@@ -60,6 +60,11 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: {{ template "proxysql.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.gracefulShutdown.envSecretName }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.gracefulShutdown.envSecretName }}
+          {{- end }}
           lifecycle:
             preStop:
               exec:
