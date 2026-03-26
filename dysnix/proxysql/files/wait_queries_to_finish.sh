@@ -20,7 +20,7 @@ proxysql_admin() {
   printf '[client]\npassword=%s\n' "${PROXYSQL_ADMIN_PASSWORD}" > "${creds}"
 
   timeout "${pause_timeout}" \
-    mysql --defaults-extra-file="${creds}" -h127.0.0.1 -P"${admin_port}" -u"${PROXYSQL_ADMIN_USER}" -e "${sql}"
+    mysql --defaults-extra-file="${creds}" --ssl-mode=DISABLED -h127.0.0.1 -P"${admin_port}" -u"${PROXYSQL_ADMIN_USER}" -e "${sql}"
   local rc=$?
 
   rm -f "${creds}"
