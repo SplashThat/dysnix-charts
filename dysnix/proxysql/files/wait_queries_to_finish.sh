@@ -14,10 +14,18 @@ PAUSE_TIMEOUT="${PROXYSQL_PAUSE_TIMEOUT:-10}"
 if [ -n "${PROXYSQL_ADMIN_USER:-}" ] && [ -n "${PROXYSQL_ADMIN_PASSWORD:-}" ]; then
   echo "Executing PROXYSQL PAUSE..."
 
-  export MYSQL_PWD="${PROXYSQL_ADMIN_PASSWORD}"
+  MYSQL_DEFAULTS=$(mktemp)
+  chmod 600 "${MYSQL_DEFAULTS}"
+  cat > "${MYSQL_DEFAULTS}" <<EOF
+[client]
+password=${PROXYSQL_ADMIN_PASSWORD}
+EOF
+
   timeout "${PAUSE_TIMEOUT}" \
-    mysql -h127.0.0.1 -P"${PROXYSQL_ADMIN_PORT:-6032}" -u"${PROXYSQL_ADMIN_USER}" -e "PROXYSQL PAUSE"
+    mysql --defaults-extra-file="${MYSQL_DEFAULTS}" -h127.0.0.1 -P"${PROXYSQL_ADMIN_PORT:-6032}" -u"${PROXYSQL_ADMIN_USER}" -e "PROXYSQL PAUSE"
   pause_exit=$?
+
+  rm -f "${MYSQL_DEFAULTS}"
 
   if [ "${pause_exit}" -eq 0 ]; then
     echo "PROXYSQL PAUSE complete. Idle connections terminated, listeners closed."
