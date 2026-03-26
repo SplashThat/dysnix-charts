@@ -37,18 +37,18 @@ pause_proxysql() {
   local rc=$?
 
   if [ "${rc}" -eq 0 ]; then
-    echo "PROXYSQL PAUSE complete. Idle connections terminated, listeners closed."
+    echo "PROXYSQL PAUSE complete. Idle connections terminated, no new connections accepted."
   elif [ "${rc}" -eq 124 ]; then
-    echo "WARNING: PROXYSQL PAUSE timed out after ${pause_timeout}s. Continuing shutdown without pause."
+    echo "WARNING: PROXYSQL PAUSE timed out after ${pause_timeout}s. Idle connections may prevent graceful shutdown and be killed by SIGKILL."
   else
-    echo "WARNING: PROXYSQL PAUSE failed (exit code ${rc}). Continuing shutdown without pause."
+    echo "WARNING: PROXYSQL PAUSE failed (exit code ${rc}). Idle connections may prevent graceful shutdown and be killed by SIGKILL."
   fi
 }
 
 if [ -n "${PROXYSQL_ADMIN_USER:-}" ] && [ -n "${PROXYSQL_ADMIN_PASSWORD:-}" ]; then
   pause_proxysql
 else
-  echo "WARNING: PROXYSQL_ADMIN_USER or PROXYSQL_ADMIN_PASSWORD not set, skipping PROXYSQL PAUSE"
+  echo "WARNING: PROXYSQL_ADMIN_USER or PROXYSQL_ADMIN_PASSWORD not set. Idle connections may prevent graceful shutdown and be killed by SIGKILL."
 fi
 
 echo "Waiting for active queries to finish..."
