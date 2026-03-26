@@ -34,6 +34,10 @@ volumeMounts: []
 #   - name: secret-confs
 #     mountPath: /etc/proxysql/secrets
 
+## Environment sources to inject into the ProxySQL container.
+## Each entry follows the Kubernetes envFrom spec (secretRef, configMapRef).
+envFrom: []
+
 podSecurityContext:
   runAsNonRoot: true
   fsGroup: 999
