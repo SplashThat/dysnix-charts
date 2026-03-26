@@ -14,8 +14,9 @@ PAUSE_TIMEOUT="${PROXYSQL_PAUSE_TIMEOUT:-10}"
 if [ -n "${PROXYSQL_ADMIN_USER:-}" ] && [ -n "${PROXYSQL_ADMIN_PASSWORD:-}" ]; then
   echo "Executing PROXYSQL PAUSE..."
 
+  export MYSQL_PWD="${PROXYSQL_ADMIN_PASSWORD}"
   timeout "${PAUSE_TIMEOUT}" \
-    MYSQL_PWD="${PROXYSQL_ADMIN_PASSWORD}" mysql -h127.0.0.1 -P"${PROXYSQL_ADMIN_PORT:-6032}" -u"${PROXYSQL_ADMIN_USER}" -e "PROXYSQL PAUSE"
+    mysql -h127.0.0.1 -P"${PROXYSQL_ADMIN_PORT:-6032}" -u"${PROXYSQL_ADMIN_USER}" -e "PROXYSQL PAUSE"
   pause_exit=$?
 
   if [ "${pause_exit}" -eq 0 ]; then
