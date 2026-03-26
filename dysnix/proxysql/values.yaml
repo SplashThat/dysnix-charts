@@ -34,11 +34,9 @@ volumeMounts: []
 #   - name: secret-confs
 #     mountPath: /etc/proxysql/secrets
 
-## Name of a Kubernetes Secret containing PROXYSQL_ADMIN_USER and
-## PROXYSQL_ADMIN_PASSWORD env vars. When set, the pre-stop hook
-## runs PROXYSQL PAUSE to gracefully drain connections on shutdown.
-gracefulShutdown:
-  envSecretName: ""
+## Environment sources to inject into the ProxySQL container.
+## Each entry follows the Kubernetes envFrom spec (secretRef, configMapRef).
+envFrom: []
 
 podSecurityContext:
   runAsNonRoot: true
