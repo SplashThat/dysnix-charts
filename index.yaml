@@ -3,6 +3,22 @@ entries:
   proxysql:
   - apiVersion: v1
     appVersion: 2.5.5
+    created: "2026-04-02T17:08:43.656750105Z"
+    description: ProxySQL Helm chart for Kubernetes
+    digest: 7d580639c85b52463c3f5eeed7c5ade28f2b55c64eec5860ac3fbf0c69fdec85
+    home: https://www.proxysql.com/
+    maintainers:
+    - email: services@dysnix.com
+      name: Dysnix
+    name: proxysql
+    sources:
+    - https://github.com/SplashThat/dysnix-charts
+    - https://github.com/sysown/proxysql
+    urls:
+    - https://github.com/SplashThat/dysnix-charts/releases/download/proxysql-0.10.6-splashthat-rc1/proxysql-0.10.6-splashthat-rc1.tgz
+    version: 0.10.6-splashthat-rc1
+  - apiVersion: v1
+    appVersion: 2.5.5
     created: "2026-03-26T15:34:07.875817927Z"
     description: ProxySQL Helm chart for Kubernetes
     digest: 3c3b71c35d0a871d7c45b38d14dd96e7edf3556902f150f92a0cfc92a7af7106
@@ -193,4 +209,4 @@ entries:
     urls:
     - https://github.com/SplashThat/dysnix-charts/releases/download/proxysql-0.10.2-splashthat-rc2/proxysql-0.10.2-splashthat-rc2.tgz
     version: 0.10.2-splashthat-rc2
-generated: "2026-03-26T15:34:07.875904277Z"
+generated: "2026-04-02T17:08:43.656875479Z"
