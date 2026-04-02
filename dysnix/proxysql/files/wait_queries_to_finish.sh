@@ -7,28 +7,28 @@ set -u
 
 ADMIN_PORT="${PROXYSQL_ADMIN_PORT:-6032}"
 ADMIN_TIMEOUT="${PROXYSQL_ADMIN_TIMEOUT:-10}"
+ADMIN_CREDS=""
+
+# Creates the MySQL credentials file once for the lifetime of the script.
+init_admin_creds() {
+  ADMIN_CREDS=$(mktemp) || { echo "ERROR: mktemp failed."; return 1; }
+  chmod 600 "${ADMIN_CREDS}"
+  printf '[client]\npassword=%s\n' "${PROXYSQL_ADMIN_PASSWORD}" > "${ADMIN_CREDS}"
+  trap 'rm -f "${ADMIN_CREDS}"' EXIT
+}
 
 # Runs a SQL command against the ProxySQL admin interface.
 # Output is raw (no headers/formatting) for easy parsing.
 proxysql_admin() {
   local sql="$1"
 
-  local creds
-  creds=$(mktemp)
-  chmod 600 "${creds}"
-  printf '[client]\npassword=%s\n' "${PROXYSQL_ADMIN_PASSWORD}" > "${creds}"
-
   timeout "${ADMIN_TIMEOUT}" \
-    mysql --defaults-extra-file="${creds}" -h127.0.0.1 -P"${ADMIN_PORT}" \
+    mysql --defaults-extra-file="${ADMIN_CREDS}" -h127.0.0.1 -P"${ADMIN_PORT}" \
       -u"${PROXYSQL_ADMIN_USER}" -sN -e "${sql}"
-  local rc=$?
-
-  rm -f "${creds}"
-  return "${rc}"
 }
 
 # Stops listeners and kills idle connections.
-# PAUSE alone does NOT set wait_timeout=0 (removed in ProxySQL v1.4.1),
+# PAUSE alone does NOT set wait_timeout=0 (removed in ProxySQL v1.4.1 https://github.com/sysown/proxysql/issues/2484#issuecomment-574092954),
 # so we set it explicitly to close idle connections immediately.
 drain_proxysql() {
   echo "Executing PROXYSQL PAUSE..."
@@ -38,9 +38,11 @@ drain_proxysql() {
   if [ "${rc}" -eq 0 ]; then
     echo "PROXYSQL PAUSE complete. No new connections accepted."
   elif [ "${rc}" -eq 124 ]; then
-    echo "WARNING: PROXYSQL PAUSE timed out after ${ADMIN_TIMEOUT}s (exit code ${rc})."
+    echo "WARNING: PROXYSQL PAUSE timed out after ${ADMIN_TIMEOUT}s (exit code ${rc}). New connections may still be accepted."
+    return 1
   else
-    echo "WARNING: PROXYSQL PAUSE failed (exit code ${rc})."
+    echo "WARNING: PROXYSQL PAUSE failed (exit code ${rc}). New connections may still be accepted."
+    return 1
   fi
 
   echo "Setting mysql-wait_timeout=0 to close idle connections..."
@@ -57,6 +59,7 @@ drain_proxysql() {
 }
 
 if [ -n "${PROXYSQL_ADMIN_USER:-}" ] && [ -n "${PROXYSQL_ADMIN_PASSWORD:-}" ]; then
+  init_admin_creds
   drain_proxysql
 else
   echo "WARNING: PROXYSQL_ADMIN_USER or PROXYSQL_ADMIN_PASSWORD not set. Idle connections may persist until SIGKILL."
