@@ -1,54 +1,55 @@
 #!/usr/bin/env bash
 
-# For all proxysql processes iterate over all tcp connections
-# and search for any established connection to port ${PROXYSQL_SERVICE_PORT_PROXY:-6033}.
-# If more than one connection is found, randomly sleep up to 3 seconds,
-# otherwise exit 0.
+# Pre-stop hook for ProxySQL: drains connections and waits for active queries
+# to finish before allowing the pod to terminate.
 
 set -u
 
+ADMIN_PORT="${PROXYSQL_ADMIN_PORT:-6032}"
+ADMIN_TIMEOUT="${PROXYSQL_ADMIN_TIMEOUT:-10}"
+
 # Runs a SQL command against the ProxySQL admin interface.
-# Handles credential file creation/cleanup and timeout.
+# Output is raw (no headers/formatting) for easy parsing.
 proxysql_admin() {
   local sql="$1"
-  local admin_port="${PROXYSQL_ADMIN_PORT:-6032}"
-  local pause_timeout="${PROXYSQL_PAUSE_TIMEOUT:-10}"
 
   local creds
   creds=$(mktemp)
   chmod 600 "${creds}"
   printf '[client]\npassword=%s\n' "${PROXYSQL_ADMIN_PASSWORD}" > "${creds}"
 
-  timeout "${pause_timeout}" \
-    mysql --defaults-extra-file="${creds}" -h127.0.0.1 -P"${admin_port}" -u"${PROXYSQL_ADMIN_USER}" -e "${sql}"
+  timeout "${ADMIN_TIMEOUT}" \
+    mysql --defaults-extra-file="${creds}" -h127.0.0.1 -P"${ADMIN_PORT}" \
+      -u"${PROXYSQL_ADMIN_USER}" -sN -e "${sql}"
   local rc=$?
 
   rm -f "${creds}"
   return "${rc}"
 }
 
-# Executes PROXYSQL PAUSE to kill idle connections and close listeners.
-# Requires PROXYSQL_ADMIN_USER and PROXYSQL_ADMIN_PASSWORD env vars.
-pause_proxysql() {
-  local pause_timeout="${PROXYSQL_PAUSE_TIMEOUT:-10}"
-
+# Stops listeners and kills idle connections.
+# PAUSE alone does NOT set wait_timeout=0 (removed in ProxySQL v1.4.1),
+# so we set it explicitly to close idle connections immediately.
+drain_proxysql() {
   echo "Executing PROXYSQL PAUSE..."
-  proxysql_admin "PROXYSQL PAUSE"
-  local rc=$?
-
-  if [ "${rc}" -eq 0 ]; then
-    echo "PROXYSQL PAUSE complete. Idle connections terminated, no new connections accepted."
-  elif [ "${rc}" -eq 124 ]; then
-    echo "WARNING: PROXYSQL PAUSE timed out after ${pause_timeout}s. Idle connections may prevent graceful shutdown and be killed by SIGKILL."
+  if proxysql_admin "PROXYSQL PAUSE"; then
+    echo "PROXYSQL PAUSE complete. No new connections accepted."
   else
-    echo "WARNING: PROXYSQL PAUSE failed (exit code ${rc}). Idle connections may prevent graceful shutdown and be killed by SIGKILL."
+    echo "WARNING: PROXYSQL PAUSE failed or timed out."
+  fi
+
+  echo "Setting mysql-wait_timeout=0 to close idle connections..."
+  if proxysql_admin "SET mysql-wait_timeout=0; LOAD MYSQL VARIABLES TO RUNTIME;"; then
+    echo "mysql-wait_timeout=0 applied. Idle connections will be closed immediately."
+  else
+    echo "WARNING: Setting wait_timeout failed. Idle connections may persist until SIGKILL."
   fi
 }
 
 if [ -n "${PROXYSQL_ADMIN_USER:-}" ] && [ -n "${PROXYSQL_ADMIN_PASSWORD:-}" ]; then
-  pause_proxysql
+  drain_proxysql
 else
-  echo "WARNING: PROXYSQL_ADMIN_USER or PROXYSQL_ADMIN_PASSWORD not set. Idle connections may prevent graceful shutdown and be killed by SIGKILL."
+  echo "WARNING: PROXYSQL_ADMIN_USER or PROXYSQL_ADMIN_PASSWORD not set. Idle connections may persist until SIGKILL."
 fi
 
 echo "Waiting for active queries to finish..."
