@@ -59,8 +59,7 @@ drain_proxysql() {
 }
 
 if [ -n "${PROXYSQL_ADMIN_USER:-}" ] && [ -n "${PROXYSQL_ADMIN_PASSWORD:-}" ]; then
-  init_admin_creds
-  drain_proxysql
+  init_admin_creds && drain_proxysql
 else
   echo "WARNING: PROXYSQL_ADMIN_USER or PROXYSQL_ADMIN_PASSWORD not set. Idle connections may persist until SIGKILL."
 fi
