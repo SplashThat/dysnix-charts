@@ -32,17 +32,27 @@ proxysql_admin() {
 # so we set it explicitly to close idle connections immediately.
 drain_proxysql() {
   echo "Executing PROXYSQL PAUSE..."
-  if proxysql_admin "PROXYSQL PAUSE"; then
+  proxysql_admin "PROXYSQL PAUSE"
+  local rc=$?
+
+  if [ "${rc}" -eq 0 ]; then
     echo "PROXYSQL PAUSE complete. No new connections accepted."
+  elif [ "${rc}" -eq 124 ]; then
+    echo "WARNING: PROXYSQL PAUSE timed out after ${ADMIN_TIMEOUT}s (exit code ${rc})."
   else
-    echo "WARNING: PROXYSQL PAUSE failed or timed out."
+    echo "WARNING: PROXYSQL PAUSE failed (exit code ${rc})."
   fi
 
   echo "Setting mysql-wait_timeout=0 to close idle connections..."
-  if proxysql_admin "SET mysql-wait_timeout=0; LOAD MYSQL VARIABLES TO RUNTIME;"; then
+  proxysql_admin "SET mysql-wait_timeout=0; LOAD MYSQL VARIABLES TO RUNTIME;"
+  local wt_rc=$?
+
+  if [ "${wt_rc}" -eq 0 ]; then
     echo "mysql-wait_timeout=0 applied. Idle connections will be closed immediately."
+  elif [ "${wt_rc}" -eq 124 ]; then
+    echo "WARNING: Setting wait_timeout timed out after ${ADMIN_TIMEOUT}s (exit code ${wt_rc})."
   else
-    echo "WARNING: Setting wait_timeout failed. Idle connections may persist until SIGKILL."
+    echo "WARNING: Setting wait_timeout failed (exit code ${wt_rc}). Idle connections may persist until SIGKILL."
   fi
 }
 
