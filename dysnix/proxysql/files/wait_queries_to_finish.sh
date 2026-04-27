@@ -55,15 +55,41 @@ drain_proxysql() {
 
   echo "Killing idle frontend sessions on this pod..."
   local idle_ids
+  local kill_sql=""
+  local killed=0
+  local rc
   # 'Sleep' — session is connected and waiting for the next client command.
   #           https://github.com/sysown/proxysql/blob/v2.4.4/lib/MySQL_Thread.cpp#L4786
   #           ProxySQL processlist docs:
   #           https://proxysql.com/documentation/the-admin-schemas/stats/stats-mysql#stats_mysql_processlist
   idle_ids=$(proxysql_admin "SELECT SessionID FROM stats_mysql_processlist WHERE command = 'Sleep'")
-  local killed=0
+  rc=$?
+  if [ "${rc}" -eq 124 ]; then
+    echo "WARNING: Query for idle sessions timed out after ${ADMIN_TIMEOUT}s. Idle connections may persist."
+    return 1
+  elif [ "${rc}" -ne 0 ]; then
+    echo "WARNING: Query for idle sessions failed (exit code ${rc}). Idle connections may persist."
+    return 1
+  fi
   for sid in ${idle_ids}; do
-    proxysql_admin "KILL CONNECTION ${sid}" >/dev/null 2>&1 && killed=$((killed + 1))
+    kill_sql="${kill_sql}KILL CONNECTION ${sid}; "
+    killed=$((killed + 1))
   done
+
+  if [ "${killed}" -eq 0 ]; then
+    echo "Killed 0 idle session(s)."
+    return 0
+  fi
+
+  proxysql_admin "${kill_sql}" >/dev/null 2>&1
+  rc=$?
+  if [ "${rc}" -eq 124 ]; then
+    echo "WARNING: Killing ${killed} idle session(s) timed out after ${ADMIN_TIMEOUT}s. Some may persist."
+    return 1
+  elif [ "${rc}" -ne 0 ]; then
+    echo "WARNING: Killing ${killed} idle session(s) failed (exit code ${rc}). Some may persist."
+    return 1
+  fi
   echo "Killed ${killed} idle session(s)."
 }
 
