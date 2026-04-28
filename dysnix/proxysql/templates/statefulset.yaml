@@ -68,7 +68,7 @@ spec:
           lifecycle:
             preStop:
               exec:
-                command: ["/bin/sh", "-c", "/usr/local/bin/wait_queries_to_finish.sh > /proc/1/fd/1"]
+                command: ["/bin/sh", "-c", "/usr/local/bin/wait_queries_to_finish.sh > /proc/$(pidof proxysql)/fd/1 2>&1"]
           ports:
             - name: proxy
               containerPort: {{ .Values.service.proxyPort }}
