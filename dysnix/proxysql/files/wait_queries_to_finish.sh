@@ -81,7 +81,7 @@ drain_proxysql() {
     return 0
   fi
 
-  proxysql_admin "${kill_sql}" >/dev/null 2>&1
+  proxysql_admin "${kill_sql}"
   rc=$?
   if [ "${rc}" -eq 124 ]; then
     echo "WARNING: Killing ${killed} idle session(s) timed out after ${ADMIN_TIMEOUT}s. Some may persist."
