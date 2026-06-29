@@ -132,6 +132,10 @@ tolerations: []
 # Will be applied if not specified otherwise.
 affinity: {}
 
+# Default topology spread constraints.
+# Will be applied if not specified otherwise.
+topologySpreadConstraints: []
+
 # Common annotations to add to all resources (sub-charts are not considered).
 # Evaluated as a template
 commonAnnotations: {}
@@ -330,6 +334,7 @@ proxysql_cluster:
       nodeSelector: {}
       tolerations: []
       affinity: {}
+      topologySpreadConstraints: []
       podAnnotations: {}
 
       resources: {}
