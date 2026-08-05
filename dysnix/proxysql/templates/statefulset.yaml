@@ -166,6 +166,10 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+    {{- with (default .Values.topologySpreadConstraints .Values.proxysql_cluster.core.statefulset.topologySpreadConstraints) }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
     {{- with (default .Values.tolerations .Values.proxysql_cluster.core.statefulset.tolerations) }}
       tolerations:
         {{- toYaml . | nindent 8 }}
