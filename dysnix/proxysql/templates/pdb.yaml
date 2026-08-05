@@ -21,6 +21,5 @@ spec:
 {{- end }}
   selector:
     matchLabels:
-      app: "{{ template "proxysql.name" . }}"
-      release: {{ .Release.Name | quote }}
+      {{- include "proxysql.core.selectorLabels" . | nindent 6 }}
 {{- end }}
