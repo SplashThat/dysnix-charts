@@ -162,8 +162,7 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- $podAntiAffinity := default .Values.podAntiAffinity .Values.proxysql_cluster.core.statefulset.podAntiAffinity }}
-    {{- $rawAffinity := default .Values.affinity .Values.proxysql_cluster.core.statefulset.affinity }}
+    {{- $podAntiAffinity := .Values.proxysql_cluster.core.statefulset.podAntiAffinity }}
     {{- if and $podAntiAffinity $podAntiAffinity.enabled }}
       affinity:
         podAntiAffinity:
@@ -182,14 +181,8 @@ spec:
                   {{- include "proxysql.core.selectorLabels" . | nindent 18 }}
               topologyKey: {{ $podAntiAffinity.topologyKey | default "kubernetes.io/hostname" }}
           {{- end }}
-    {{- else }}
-    {{- with $rawAffinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- end }}
-    {{- $podTSC := default .Values.podTopologySpreadConstraints .Values.proxysql_cluster.core.statefulset.podTopologySpreadConstraints }}
-    {{- $rawTSC := default .Values.topologySpreadConstraints .Values.proxysql_cluster.core.statefulset.topologySpreadConstraints }}
+    {{- $podTSC := .Values.proxysql_cluster.core.statefulset.podTopologySpreadConstraints }}
     {{- if $podTSC }}
       topologySpreadConstraints:
       {{- range $podTSC }}
@@ -200,11 +193,6 @@ spec:
             matchLabels:
               {{- include "proxysql.core.selectorLabels" $ | nindent 14 }}
       {{- end }}
-    {{- else }}
-    {{- with $rawTSC }}
-      topologySpreadConstraints:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
     {{- end }}
     {{- with (default .Values.tolerations .Values.proxysql_cluster.core.statefulset.tolerations) }}
       tolerations:

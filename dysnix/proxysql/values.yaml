@@ -128,29 +128,6 @@ nodeSelector: {}
 # Will be applied if not specified otherwise.
 tolerations: []
 
-# Default node affinity.
-# Will be applied if not specified otherwise.
-affinity: {}
-
-# Default topology spread constraints.
-# Will be applied if not specified otherwise.
-topologySpreadConstraints: []
-
-# Structured pod anti-affinity. Automatically uses the chart's own selector labels
-# so the release name is never hardcoded in values.
-# type: hard  -> requiredDuringSchedulingIgnoredDuringExecution (one pod per node)
-# type: soft  -> preferredDuringSchedulingIgnoredDuringExecution
-podAntiAffinity:
-  enabled: false
-  type: hard
-  topologyKey: kubernetes.io/hostname
-
-# Structured topology spread constraints. Automatically injects the chart's
-# selector labels, so the release name is never hardcoded in values.
-podTopologySpreadConstraints: []
-# - maxSkew: 1
-#   topologyKey: topology.kubernetes.io/zone
-#   whenUnsatisfiable: ScheduleAnyway
 
 # Common annotations to add to all resources (sub-charts are not considered).
 # Evaluated as a template
@@ -381,8 +358,6 @@ proxysql_cluster:
     statefulset:
       nodeSelector: {}
       tolerations: []
-      affinity: {}
-      topologySpreadConstraints: []
       podAntiAffinity:
         enabled: false
         type: hard
