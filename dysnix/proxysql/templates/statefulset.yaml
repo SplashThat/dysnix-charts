@@ -162,13 +162,37 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- with (default .Values.affinity .Values.proxysql_cluster.core.statefulset.affinity) }}
+    {{- $podAntiAffinity := .Values.proxysql_cluster.core.statefulset.podAntiAffinity }}
+    {{- if and $podAntiAffinity $podAntiAffinity.enabled }}
       affinity:
-        {{- toYaml . | nindent 8 }}
+        podAntiAffinity:
+          {{- if eq $podAntiAffinity.type "soft" }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    {{- include "proxysql.core.selectorLabels" . | nindent 20 }}
+                topologyKey: {{ $podAntiAffinity.topologyKey | default "kubernetes.io/hostname" }}
+          {{- else }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  {{- include "proxysql.core.selectorLabels" . | nindent 18 }}
+              topologyKey: {{ $podAntiAffinity.topologyKey | default "kubernetes.io/hostname" }}
+          {{- end }}
     {{- end }}
-    {{- with (default .Values.topologySpreadConstraints .Values.proxysql_cluster.core.statefulset.topologySpreadConstraints) }}
+    {{- $podTSC := .Values.proxysql_cluster.core.statefulset.podTopologySpreadConstraints }}
+    {{- if $podTSC }}
       topologySpreadConstraints:
-        {{- toYaml . | nindent 8 }}
+      {{- range $podTSC }}
+        - maxSkew: {{ .maxSkew }}
+          topologyKey: {{ .topologyKey }}
+          whenUnsatisfiable: {{ .whenUnsatisfiable }}
+          labelSelector:
+            matchLabels:
+              {{- include "proxysql.core.selectorLabels" $ | nindent 14 }}
+      {{- end }}
     {{- end }}
     {{- with (default .Values.tolerations .Values.proxysql_cluster.core.statefulset.tolerations) }}
       tolerations:

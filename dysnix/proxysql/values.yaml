@@ -128,13 +128,6 @@ nodeSelector: {}
 # Will be applied if not specified otherwise.
 tolerations: []
 
-# Default node affinity.
-# Will be applied if not specified otherwise.
-affinity: {}
-
-# Default topology spread constraints.
-# Will be applied if not specified otherwise.
-topologySpreadConstraints: []
 
 # Common annotations to add to all resources (sub-charts are not considered).
 # Evaluated as a template
@@ -365,8 +358,11 @@ proxysql_cluster:
     statefulset:
       nodeSelector: {}
       tolerations: []
-      affinity: {}
-      topologySpreadConstraints: []
+      podAntiAffinity:
+        enabled: false
+        type: hard
+        topologyKey: kubernetes.io/hostname
+      podTopologySpreadConstraints: []
       podAnnotations: {}
 
       resources: {}
